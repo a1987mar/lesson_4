@@ -12,7 +12,6 @@ const (
 
 type DocumentField struct {
 	Type DocumentFieldType `json:"type"`
-	Cfg  CollectionConfig  `json:"Cfg"`
 }
 
 type Document struct {

@@ -2,12 +2,11 @@ package documentstore
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type Collection struct {
-	Colect     map[string]Document `json:"colect"`
-	PrimaryKey CollectionConfig
+	documents map[string]Document
+	config    CollectionConfig
 }
 
 type CollectionConfig struct {
@@ -16,39 +15,41 @@ type CollectionConfig struct {
 
 func (s *Collection) Put(doc Document) {
 	// Потрібно перевірити що документ містить поле `{cfg.PrimaryKey}` типу `string`
-	keyf, ok := doc.Fields["key"]
+	keyf, ok := doc.Fields[s.config.PrimaryKey]
 	if !ok {
 		fmt.Println("Error: Document must contain a 'key' field of type string")
 		return
 	}
 
-	keys := reflect.TypeOf(keyf.Cfg.PrimaryKey).Kind()
-	if keys != reflect.String {
-		fmt.Println("Error: 'key' field value must be a string")
+	if keyf.Type != DocumentFieldTypeString {
+		fmt.Println("Error: Key field must be of type string")
 		return
 	}
 
-	s.Colect[keyf.Cfg.PrimaryKey] = doc
+	if s.documents == nil {
+		s.documents = map[string]Document{}
+	}
+	s.documents[s.config.PrimaryKey] = doc
 }
 
 func (s *Collection) Get(key string) (*Document, bool) {
-	if doc, exists := s.Colect[key]; exists {
+	if doc, exists := s.documents[key]; exists {
 		return &doc, true
 	}
 	return nil, false
 }
 
 func (s *Collection) Delete(key string) bool {
-	if _, exists := s.Colect[key]; exists {
-		delete(s.Colect, key)
+	if _, exists := s.documents[key]; exists {
+		delete(s.documents, key)
 		return true
 	}
 	return false
 }
 
 func (s *Collection) List() []Document {
-	sList := make([]Document, 0, len(s.Colect))
-	for _, v := range s.Colect {
+	sList := make([]Document, 0, len(s.documents))
+	for _, v := range s.documents {
 		sList = append(sList, v)
 	}
 	return sList
