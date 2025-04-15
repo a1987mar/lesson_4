@@ -17,7 +17,8 @@ func (s *Store) CreateCollection(name string) (bool, *Collection) {
 	if _, ok := s.collections[name]; ok {
 		return false, nil
 	}
-	s.collections[name] = Collection{}
+	collect := Collection{}
+	s.collections[name] = collect
 	return true, &Collection{}
 }
 
